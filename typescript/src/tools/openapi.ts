@@ -117,7 +117,11 @@ export class OpenAPITool extends Tool<OpenAPIToolOutput, OpenAPIToolOptions> {
                         properties: Object.fromEntries(
                           parameters.map((p: any) => [
                             p.name,
-                            { ...p.schema, description: p.name },
+                            {
+                              ...p.schema,
+                              // The model only sees this text, so prefer the spec's own words over the name.
+                              description: p.description || p.schema?.description || p.name,
+                            },
                           ]),
                         ),
                       },

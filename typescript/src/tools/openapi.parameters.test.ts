@@ -103,6 +103,33 @@ describe("OpenAPITool parameter locations", () => {
     expect(request().headers.get("X-Region")).toBe("east");
   });
 
+  it("keeps parameter descriptions in the input schema", () => {
+    const tool = createTool({
+      ...schema([
+        { name: "status", in: "query", description: "Adoption status", schema: { type: "string" } },
+        {
+          name: "limit",
+          in: "query",
+          schema: { type: "integer", description: "Max items, 1-100" },
+        },
+        { name: "offset", in: "query", schema: { type: "integer" } },
+        { $ref: "#/components/parameters/Sort" },
+      ]),
+      components: {
+        parameters: {
+          Sort: { name: "sort", in: "query", description: "Order", schema: { type: "string" } },
+        },
+      },
+    });
+
+    expect(tool.inputSchema().oneOf[0].properties.parameters.properties).toMatchObject({
+      status: { description: "Adoption status" },
+      limit: { description: "Max items, 1-100" },
+      offset: { description: "offset" },
+      sort: { description: "Order" },
+    });
+  });
+
   it.each([
     ["summary", "Pets"],
     ["description", "Pet operations"],
